@@ -1,55 +1,73 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
-import { IEvent } from './event.interface';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Event } from './entities/event.entity';
+import { Repository } from 'typeorm';
 
 @Injectable() // so that IOC can be performed
 export class EventService {
-  // private readonly event: IEvent[] = [];
-  private events: IEvent[] = [
-    { id: 1, name: 'pashupati sar safai', location: 'pashupati templee' },
-    { id: 2, name: 'swoyambhu sar safai', location: 'swoyambhu' },
-  ];
+  constructor(
+    @InjectRepository(Event)
+    private readonly eventRepository: Repository<Event>,
+  ) {}
 
-  create(createEventDto: CreateEventDto) {
-    this.events.push({
-      id: this.events[this.events.length - 1].id + 1,
-      name: createEventDto.name,
-      location: createEventDto.location,
-    });
-    return {
-      status: HttpStatus.CREATED,
-      events: this.events,
-    };
-  }
-
-  findAll(): IEvent[] {
-    return this.events;
-  }
-
-  findOne(id: number) {
-    if (id > 0 && id <= this.events.length) {
-      return this.events[id - 1];
-    } else {
-      return 'item not found';
+  async create(createEventDto: CreateEventDto): Promise<Event> {
+    try {
+      const eventResponse = await this.eventRepository.save({
+        ...createEventDto,
+        // created_by: 'ADMIN',
+      });
+      return eventResponse;
+    } catch (e) {
+      console.log(e);
+      throw new HttpException('Could not add event', HttpStatus.BAD_REQUEST);
     }
   }
 
-  update(id: number, updateEventDto: UpdateEventDto) {
-    if (id > 0 && id <= this.events.length) {
-      this.events.splice(id - 1, 1, { id, ...updateEventDto });
-      return this.events[id - 1];
-    } else {
-      return 'item not found';
+  async findAll(): Promise<Event[]> {
+    try {
+      return await this.eventRepository.createQueryBuilder('events').getMany();
+    } catch (e) {
+      console.log(e);
+      throw new HttpException('Could not fetch event', HttpStatus.BAD_REQUEST);
     }
   }
 
-  remove(id: number) {
-    if (id > 0 && id <= this.events.length) {
-      this.events.splice(id - 1, 1);
-      return this.events;
-    } else {
-      return 'item not found';
+  async findOne(id: string): Promise<Event> {
+    try {
+      return await this.eventRepository
+        .createQueryBuilder('events')
+        .where('id =:eventId', { eventId: id })
+        .getOne();
+    } catch (e) {
+      console.log(e);
+      throw new HttpException('Could not fetch event', HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async update(id: string, updateEventDto: UpdateEventDto) {
+    try {
+      return await this.eventRepository
+        .createQueryBuilder()
+        .update(Event)
+        .set({ ...updateEventDto })
+        .where('id =:eventId', { eventId: id })
+        .execute();
+    } catch (e) {
+      console.log(e);
+      throw new HttpException('Could not update event', HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async remove(id: string) {
+    try {
+      return await this.eventRepository.delete({
+        id,
+      });
+    } catch (e) {
+      console.log(e);
+      throw new HttpException('Could not delete event', HttpStatus.BAD_REQUEST);
     }
   }
 }

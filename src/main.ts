@@ -1,8 +1,9 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-
-const PORT = 3000;
+import helmet from 'helmet';
+import 'dotenv/config';
+import * as compression from 'compression';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -17,6 +18,23 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
-  await app.listen(PORT);
+
+  /*
+    protect your app from some well-known web vulnerabilities by setting HTTP headers appropriately.
+    collection of smaller middleware functions that set security-related HTTP headers
+    provides 11 security related middlewares
+  */
+  app.use(helmet());
+
+  //mechanism that allows resources to be requested from another domain
+  app.enableCors();
+
+  /*
+  Compression can greatly decrease the size of 
+  the response body, thereby increasing the speed of a web app.
+  */
+  app.use(compression());
+
+  await app.listen(process.env.APP_PORT);
 }
 bootstrap();
