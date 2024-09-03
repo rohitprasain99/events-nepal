@@ -10,7 +10,9 @@ import {
 import { EventService } from './event.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Events')
 @Controller('events')
 export class EventController {
   constructor(private readonly eventService: EventService) {} //IOC
@@ -28,6 +30,8 @@ export class EventController {
   }
 
   @Get()
+  @ApiOperation({ summary: 'Get all events' })
+  @ApiResponse({ status: 200, description: 'List of events.' })
   findAll() {
     return this.eventService.findAll();
   }

@@ -10,7 +10,9 @@ import {
 import { TestService } from './test.service';
 import { CreateTestDto } from './dto/create-test.dto';
 import { UpdateTestDto } from './dto/update-test.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Test')
 @Controller('test')
 export class TestController {
   constructor(private readonly testService: TestService) {}
