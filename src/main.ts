@@ -4,6 +4,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import 'dotenv/config';
 import * as compression from 'compression';
+import { ResponseInterceptor } from './core/interceptors/response.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -35,6 +36,10 @@ async function bootstrap() {
   */
   app.use(compression());
 
+  app.useGlobalInterceptors(new ResponseInterceptor());
+
+  // Starts listening for shutdown hooks
+  app.enableShutdownHooks();
   await app.listen(process.env.APP_PORT);
 }
 bootstrap();
