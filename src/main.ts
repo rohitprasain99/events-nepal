@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import 'dotenv/config';
 import * as compression from 'compression';
 import { ResponseInterceptor } from './core/interceptors/response.interceptor';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -38,6 +39,15 @@ async function bootstrap() {
 
   app.useGlobalInterceptors(new ResponseInterceptor());
 
+  app.useGlobalPipes(
+    new ValidationPipe({
+      //removes all properties of request's body which are not in dto
+      whitelist: true,
+
+      //all to transform properties, int -> string
+      transform: false,
+    }),
+  );
   // Starts listening for shutdown hooks
   app.enableShutdownHooks();
   await app.listen(process.env.APP_PORT);
