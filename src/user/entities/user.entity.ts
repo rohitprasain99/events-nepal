@@ -21,7 +21,7 @@ export class Users extends GenericEntity {
     enum: RoleEnum,
     default: RoleEnum.ADMIN,
   })
-  role: string;
+  role: RoleEnum;
 
   @Column({
     type: 'enum',

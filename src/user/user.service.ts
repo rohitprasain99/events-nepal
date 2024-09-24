@@ -35,7 +35,7 @@ export class UserService {
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+    return updateUserDto;
   }
 
   remove(id: number) {
@@ -51,6 +51,21 @@ export class UserService {
       return !!user;
     } catch (e) {
       console.error('errrr', e);
+      throw new HttpException('Error fetching user', HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async isAuthenticatedUser(username: string) {
+    try {
+      const user = await this.userRepository
+        .createQueryBuilder('users')
+        .where('users.username = :email', { email: username })
+        // .orWhere('users.phone_number = :phone_number', { phone_number: username })
+        .getOne();
+
+      return user;
+    } catch (e) {
+      console.error(e);
       throw new HttpException('Error fetching user', HttpStatus.BAD_REQUEST);
     }
   }
