@@ -34,21 +34,90 @@ export class AuthService {
   }
 
   async login(user: Users) {
-    // check if user is authentic - check username and password -> this done using guards
+    /*
+    check if user is authentic 
+    ->check username and password 
+    -> this done using guards
+    */
+
     // generate access and refresh token
 
-    const accessToken: string = await this.generateToken(
+    const accessToken: string = this.generateAccessToken(
       user.id,
       user.username,
       user.role,
     );
 
-    // save refresh token in db
+    // generate and save refresh token in db
+    const refreshToken: string = this.generateRefreshToken(user.id);
+
+    try {
+      await this.userService.saveRefreshToken(user.id, refreshToken);
+    } catch (e) {
+      console.warn(e);
+      throw new HttpException(
+        'Error saving refresh token',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     return {
       role: user.role,
       accessToken,
-      refreshToken: '', // TODO: implement later
+      refreshToken: refreshToken,
     };
+  }
+
+  async logout(userId: string) {
+    // check if the user exists
+    // remove refresh token of the user
+    // clear cookies
+
+    try {
+      await this.userService.findUserAndClearRefreshToken(userId);
+    } catch (e) {
+      console.log(e);
+      throw new HttpException(
+        'Error logging out',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async generateNewAccessToken(previousRefreshToken: string) {
+    try {
+      // check if previous refresh token is expired
+      const decodedToken: {
+        id: string;
+        iat: number;
+        exp: number;
+      } = this.jwtService.verify(previousRefreshToken, {
+        secret: process.env.REFRESH_TOKEN_SECRET,
+      });
+      // check if the user exists and refresh token matches
+      const user: Users = await this.userService.findUserAndCheckRefreshToken(
+        decodedToken.id,
+        previousRefreshToken,
+      );
+      if (!!user) {
+        // generate new access and refresh token
+        const accessToken = this.generateAccessToken(
+          user.id,
+          user.username,
+          user.role,
+        );
+        const newRefreshToken = this.generateRefreshToken(user.id);
+        //save new refresh token to db
+        await this.userService.saveRefreshToken(user.id, newRefreshToken);
+        return {
+          accessToken,
+          refreshToken: newRefreshToken,
+        };
+      }
+    } catch (e) {
+      console.warn(e);
+      throw new HttpException('Token Invalid', HttpStatus.UNAUTHORIZED);
+    }
   }
 
   findAll() {
@@ -80,7 +149,11 @@ export class AuthService {
     return null;
   }
 
-  public generateToken(id: string, username: string, role: RoleEnum): string {
+  public generateAccessToken(
+    id: string,
+    username: string,
+    role: RoleEnum,
+  ): string {
     return this.jwtService.sign(
       {
         id: id,
@@ -88,8 +161,20 @@ export class AuthService {
         role: role,
       },
       {
-        secret: process.env.JWT_SECRET,
-        expiresIn: '123456789days',
+        secret: process.env.ACCESS_TOKEN_SECRET,
+        expiresIn: process.env.ACCESS_EXPIRY,
+      },
+    );
+  }
+
+  public generateRefreshToken(id: string): string {
+    return this.jwtService.sign(
+      {
+        id: id,
+      },
+      {
+        secret: process.env.REFRESH_TOKEN_SECRET,
+        expiresIn: process.env.REFRESH_EXPIRY,
       },
     );
   }

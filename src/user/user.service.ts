@@ -13,6 +13,7 @@ export class UserService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
+    //TODO : if user is admin make pending status `ACTIVE`
     try {
       await this.userRepository
         .createQueryBuilder()
@@ -23,15 +24,19 @@ export class UserService {
     } catch (e) {
       throw e;
     }
-    return 'This action adds a new user';
   }
 
   findAll() {
     return `This action returns all user`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(userId: string) {
+    try {
+      return await this.userRepository.findOne({ where: { id: userId } });
+    } catch (e) {
+      console.warn(e);
+      throw e;
+    }
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
@@ -42,6 +47,7 @@ export class UserService {
     return `This action removes a #${id} user`;
   }
 
+  //helpers
   async isDuplicateUser(username: string): Promise<boolean> {
     try {
       const user = await this.userRepository
@@ -68,5 +74,49 @@ export class UserService {
       console.error(e);
       throw new HttpException('Error fetching user', HttpStatus.BAD_REQUEST);
     }
+  }
+
+  async saveRefreshToken(id: string, refreshToken: string) {
+    try {
+      const formattedData = {
+        refresh_token: refreshToken,
+        updated_by: id,
+      };
+      await this.userRepository
+        .createQueryBuilder()
+        .update(Users)
+        .set(formattedData)
+        .where('id =:userId', { userId: id })
+        .execute();
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  async findUserAndClearRefreshToken(id: string) {
+    try {
+      const formattedData = {
+        refresh_token: '',
+        updated_by: id,
+      };
+      await this.userRepository
+        .createQueryBuilder()
+        .update(Users)
+        .set(formattedData)
+        .where('id =:userId', { userId: id })
+        .execute();
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  async findUserAndCheckRefreshToken(userId, previousRefreshToken) {
+    const user = await this.userRepository.findOne({
+      where: {
+        id: userId,
+        refresh_token: previousRefreshToken,
+      },
+    });
+    return user;
   }
 }

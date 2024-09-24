@@ -29,4 +29,7 @@ export class Users extends GenericEntity {
     default: StatusEnum.PENDING,
   })
   status: string;
+
+  @Column({ nullable: true })
+  refresh_token: string;
 }
