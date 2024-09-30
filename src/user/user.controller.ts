@@ -12,11 +12,14 @@ import {
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Users')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  // register ADMIN or Organizer
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
     try {
@@ -26,6 +29,11 @@ export class UserController {
       throw new HttpException('Error creating user', HttpStatus.BAD_REQUEST);
     }
   }
+
+  /*TODO for ADMIN
+   - admin CRUD organizer
+   - admin approves organizer/participant
+   */
 
   @Get()
   findAll() {
@@ -44,6 +52,6 @@ export class UserController {
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+    return this.userService.remove(id);
   }
 }

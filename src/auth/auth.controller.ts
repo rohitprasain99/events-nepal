@@ -17,7 +17,9 @@ import { UpdateAuthDto } from './dto/update-auth.dto';
 import { LocalAuthGuard } from 'src/core/guard/local-auth.guard';
 import { JwtAuthGuard } from 'src/core/guard/jwt-auth.guard';
 import { ResponseMessage } from 'src/core/decorators/response.decorator';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -35,7 +37,7 @@ export class AuthController {
   @Post('login')
   @UseGuards(LocalAuthGuard)
   login(@Request() req: any) {
-    return this.authService.login(req.user);
+    this.authService.login(req.user);
   }
 
   @Post('logout')

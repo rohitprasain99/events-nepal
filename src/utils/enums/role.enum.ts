@@ -1,5 +1,9 @@
 export enum RoleEnum {
+  /* WE ALSO CAN WRITE AS
   ADMIN = 'admin',
-  ORGANIZER = 'organizer',
-  PARTICIPANT = 'participant',
+  */
+
+  ADMIN,
+  ORGANIZER,
+  PARTICIPANT,
 }

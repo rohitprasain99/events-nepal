@@ -26,8 +26,13 @@ export class UserService {
     }
   }
 
-  findAll() {
-    return `This action returns all user`;
+  async findAll() {
+    const res = await this.userRepository
+      .createQueryBuilder('users')
+      .where('users.role =:role', { role: 'ORGANIZER' })
+      .getMany();
+
+    return res;
   }
 
   async findOne(userId: string) {
@@ -43,8 +48,14 @@ export class UserService {
     return updateUserDto;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(userId: string) {
+    const res = await this.userRepository
+      .createQueryBuilder()
+      .delete()
+      .from(Users)
+      .where('id =:id', { id: userId })
+      .execute();
+    return res;
   }
 
   //helpers

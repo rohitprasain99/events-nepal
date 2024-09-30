@@ -16,7 +16,7 @@ async function bootstrap() {
     .setTitle('Events Nepal API')
     .setDescription('Events Nepal API description')
     .setVersion('1.0')
-    .addTag('Events-Nepal')
+    .addTag('EventsNepalAPI V1')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);

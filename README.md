@@ -83,3 +83,27 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
+## NOTES
+
+providers
+-> services
+-> repositories
+-> helpers
+-> factories
+
+provider vaneko chai it can be injected as a dependency
+
+module
+-> { controllers, providers, imports, exports}
+
+imports
+-> {forRoot, forFeature, Modules} haru import garne
+
+exports
+-> export providers that should be accessed by other modules
+-> imported module pani export garna milxa if child module haru le use garna parne xa vane
+
+# A module class can inject providers as well (e.g., for configuration purposes).
+
+However, module classes themselves cannot be injected as providers due to circular dependency.

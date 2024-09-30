@@ -1,8 +1,25 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { ParticipantService } from './participant.service';
 import { CreateParticipantDto } from './dto/create-participant.dto';
 import { UpdateParticipantDto } from './dto/update-participant.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+/* TODO for PARTICIPANT
+   - register to event
+   - receive email
+   - click to confirm
+   - click to decline
+  */
+
+@ApiTags('Participant')
 @Controller('participant')
 export class ParticipantController {
   constructor(private readonly participantService: ParticipantService) {}
@@ -23,7 +40,10 @@ export class ParticipantController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateParticipantDto: UpdateParticipantDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateParticipantDto: UpdateParticipantDto,
+  ) {
     return this.participantService.update(+id, updateParticipantDto);
   }
 

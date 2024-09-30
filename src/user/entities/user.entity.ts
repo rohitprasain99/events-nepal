@@ -1,6 +1,5 @@
 import { Exclude } from 'class-transformer';
 import { GenericEntity } from 'src/core/common/generic.entity';
-import { StatusEnum } from 'src/utils/enums/kyc-status.enum';
 import { RoleEnum } from 'src/utils/enums/role.enum';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
@@ -16,20 +15,16 @@ export class Users extends GenericEntity {
   @Column()
   password: string;
 
+  @Column({ nullable: true })
+  refresh_token: string;
+
+  @Column({ nullable: true })
+  google_id: string;
+
   @Column({
     type: 'enum',
     enum: RoleEnum,
     default: RoleEnum.ADMIN,
   })
   role: RoleEnum;
-
-  @Column({
-    type: 'enum',
-    enum: StatusEnum,
-    default: StatusEnum.PENDING,
-  })
-  status: string;
-
-  @Column({ nullable: true })
-  refresh_token: string;
 }
